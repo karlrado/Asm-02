@@ -1,0 +1,33 @@
+name: Build
+on:
+    push:
+jobs:
+    build-linux:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v2
+            - name: Compile
+              run: |
+                make
+
+    build-windows:
+        runs-on: windows-2019
+        strategy:
+            matrix:
+                arch:
+                    - x86
+                    - x64
+        steps:
+            - uses: actions/checkout@v2
+            - uses: ilammy/msvc-dev-cmd@v1
+              with:
+                arch: ${{ matrix.arch }}
+            - name: Compile
+              run: |
+                cl *.c /Fe:asm02.exe
+            - name: Upload Artifact
+              uses: actions/upload-artifact@v1
+              if: matrix.arch == 'x86'
+              with:
+                name: ASM02
+                path: ${{ github.workspace }}/asm02.exe
